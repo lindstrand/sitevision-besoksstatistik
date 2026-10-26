@@ -1,52 +1,129 @@
 # Installera Besöksstatistik
 
-## Innan du börjar
+Den här guiden beskriver hela vägen från Piwik PRO och certifikat till en installerad widget i Sitevision.
 
-Kontrollera att:
+## 1. Kontrollera Piwik PRO i Sitevision
 
-1. Piwik PRO är kopplat till Sitevision.
-2. Du har behörighet att hantera tillägg.
-3. Du har en version av widgeten som är signerad med ett certifikat som webbplatsen litar på.
+Widgeten använder Sitevisions egen koppling till Piwik PRO.
 
-I en produktionsmiljö kräver Sitevision att WebApps är signerade med ett Sitevision-godkänt certifikat.
+Kontrollera att Piwik PRO är konfigurerat under:
 
-## Installera en färdig signerad version
+**Webbplatsinställningar → Integration → Webbanalys**
 
-1. Öppna **Tillägg** i Sitevision.
-2. Skapa eller välj ett tillägg för dashboard-widgeten.
-3. Importera den signerade ZIP-filen.
-4. Aktivera den nya versionen.
-5. Lägg till widgeten i en dashboard.
-6. Öppna widgetens globala inställningar och kontrollera Piwik PRO-inställningarna.
+Du behöver också tillägget **Piwik PRO - RESTApi** (`sv-piwik-pro-backend`) från Sitevision Marketplace.
 
-Om Sitevision säger att certifikatet inte är betrott måste certifikatet som användes vid signeringen först läggas till under webbplatsens betrodda tilläggscertifikat.
+### Tillåt GET och POST
 
-## Bygg och signera själv
+Det här är viktigt. Widgeten använder POST för att hämta statistik.
 
-Installera Node.js och packa upp källkoden i en ny, tom mapp.
+1. Gå till **Tillägg** i Sitevision.
+2. Öppna `sv-piwik-pro-backend`.
+3. Välj **Egenskaper → Restriktioner**.
+4. För **Alla inloggade användare**, tillåt både **GET** och **POST**.
 
-Kör:
+GET är normalt redan tillåtet. Om POST saknas får widgeten **HTTP 405** och statistiken kan inte hämtas.
+
+## 2. Skaffa ett Sitevision-certifikat
+
+WebApps som ska användas på en produktionswebbplats måste signeras med ett certifikat som är godkänt av Sitevision.
+
+Gör så här:
+
+1. Gå till [developer.sitevision.se](https://developer.sitevision.se/).
+2. Logga in eller skapa ett konto.
+3. Bli medlem i ett team. Certifikat i Sitevision hör alltid till ett team.
+4. Öppna teamets sida.
+5. Skapa ett certifikat.
+
+När du skapar certifikatet anger du ett namn för certifikatet. Sitevision signerar certifikatet så att det kan användas för WebApps i produktion.
+
+Ett av teamets certifikat är valt som standard. Om du inte anger något certifikatnamn när du signerar används standardcertifikatet.
+
+## 3. Lägg certifikatet på webbplatsen
+
+Ladda ner certifikatets publika del från teamets sida på developer.sitevision.se.
+
+I Sitevision:
+
+1. Öppna **Webbplatsinställningar**.
+2. Gå till **Tilläggscertifikat**.
+3. Lägg till certifikatet bland de betrodda certifikaten.
+
+Det certifikat som används när widgeten signeras måste finnas här, annars går den signerade widgeten inte att använda på webbplatsen.
+
+## 4. Hämta källkoden
+
+Ladda ner källkoden från GitHub och packa upp den i en ny, tom mapp.
+
+Du behöver Node.js och npm installerat.
+
+## 5. Installera beroenden
+
+I Windows PowerShell:
 
 ```powershell
 npm.cmd ci
+```
+
+På macOS eller Linux:
+
+```bash
+npm ci
+```
+
+## 6. Bygg widgeten
+
+I Windows:
+
+```powershell
 npm.cmd run build
 ```
 
-Kontrollera att bygget avslutas utan fel.
+På macOS eller Linux:
 
-Signera sedan med ert eget Sitevision-certifikat:
+```bash
+npm run build
+```
+
+Bygget kör också projektets versions- och säkerhetskontroll.
+
+När bygget är klart finns ZIP-filen i mappen `dist`.
+
+## 7. Signera widgeten
+
+I Windows:
 
 ```powershell
 npm.cmd run sign
 ```
 
-Den signerade filen skapas i `dist`.
+På macOS eller Linux:
 
-Certifikatet som används vid signeringen måste också vara installerat som betrott tilläggscertifikat på webbplatsen där widgeten ska användas.
+```bash
+npm run sign
+```
 
-## Ställ in widgeten
+Du får ange användarnamn och lösenord för developer.sitevision.se.
 
-När widgeten är installerad bör du kontrollera de globala inställningarna.
+Du får också frågan:
+
+```text
+Certificate name for signing (blank for default)
+```
+
+Tryck Enter om du vill använda teamets standardcertifikat. Annars anger du namnet på det certifikat du vill använda.
+
+När signeringen lyckas skapas en signerad ZIP-fil i `dist`.
+
+## 8. Installera den signerade widgeten
+
+1. Öppna **Tillägg** i Sitevision.
+2. Skapa eller välj tillägget där widgeten ska ligga.
+3. Importera den signerade ZIP-filen från `dist`.
+4. Aktivera den nya versionen.
+5. Lägg till widgeten i en dashboard.
+
+## 9. Kontrollera widgetens inställningar
 
 Viktigast är:
 
@@ -62,15 +139,17 @@ Standard för PageID-dimensionen är:
 event_custom_dimension_1
 ```
 
-Om er Sitevision-installation använder en annan Piwik PRO-dimension behöver den ändras.
+Om er Piwik PRO-installation använder en annan dimension behöver den ändras i widgetens globala inställningar.
 
-## Testa efter installation
+## 10. Testa
 
-Testa gärna både:
+Testa gärna:
 
 - **Denna sida**
 - **Denna gren**
 - 30 dagar
 - en större gren med många sidor
 
-Kontrollera att statistiken laddas klart och att siffrorna stämmer mot Piwik PRO.
+Kontrollera att statistiken laddas klart och att siffrorna ser rimliga ut.
+
+Om nästan all statistik misslyckas och den tekniska diagnostiken visar **HTTP 405**, kontrollera först att POST är tillåtet i `sv-piwik-pro-backend`.
