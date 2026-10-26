@@ -1,0 +1,7 @@
+.svs-query-exceptions {
+  margin: 1rem 0 1rem 1rem;
+  padding-left: 1rem;
+  border-left: 3px solid #ddd;
+}
+.svs-query-exception { margin-bottom: .75rem; }
+.svs-query-exception-fields { margin: .75rem 0 0; padding: 0; border: 0; }
