@@ -1,57 +1,51 @@
 # Säkerhet och integritet
 
-## Hemligheter
+## Piwik PRO
 
-Repositoryt får aldrig innehålla:
-
-- Sitevision-administratörsuppgifter
-- `.dev_properties.json`
-- `.env`-filer
-- Piwik PRO Client ID eller Client Secret
-- access tokens eller Bearer tokens
-- certifikatfiler och privata nycklar, om inte publicering av en specifik publik certifikatdel har beslutats separat
-- lokala användarsökvägar
-- interna privata IP-adresser
-
-Piwik PRO-autentisering tillhör Sitevisions centrala webbanalyskonfiguration och ska inte lagras i widgeten.
+Widgeten innehåller inga Piwik PRO-lösenord, Client ID eller Client Secret. Anslutningen går via Sitevisions centrala Piwik PRO-integration.
 
 ## Loggning
 
-Serverloggning ska ske med Sitevisions `LogUtil`.
+Widgeten använder Sitevisions `LogUtil`.
 
-Normal loggning får innehålla:
+Loggen kan innehålla:
 
 - appversion
-- generell händelse/feltyp
+- generell feltyp
+- HTTP-status
 - svarstid
 
-Normal loggning får inte innehålla:
+Loggen innehåller inte:
 
-- råa Piwik-svar
-- cookies eller sessionsidentifierare
+- rå Piwik-data
 - IP-adresser
-- användarnamn eller personuppgifter
-- tokens, lösenord eller hemligheter
+- användarnamn
+- cookies
+- tokens
+- lösenord
 - fullständiga URL:er med querystring
-
-Teknisk diagnostik i gränssnittet är avstängd som standard och ska endast aktiveras tillfälligt av administratör vid felsökning.
 
 ## Länkar
 
-URL:er som kommer från statistikdata får bara göras klickbara om de använder `http` eller `https`. Relativa länkar tillåts endast där funktionen uttryckligen behöver dem.
+Länkar från statistikdata görs bara klickbara när de använder `http` eller `https`. Relativa länkar används bara där widgeten behöver dem.
 
-## Dependency-kontroll
+## Filer som inte ska publiceras
 
-Kör vid varje release:
+Lägg aldrig följande i GitHub:
+
+- `.dev_properties.json`
+- `.env`-filer
+- privata nycklar
+- certifikat
+- tokens
+- lösenord
+
+## Kontroll före bygg och signering
+
+Projektet har en automatisk kontroll som körs före build och signering:
 
 ```powershell
-npm.cmd ci
-npm.cmd audit
-npm.cmd run build
+npm.cmd run check
 ```
 
-En release ska inte publiceras om npm rapporterar en känd sårbarhet utan att den först bedömts och dokumenterats.
-
-## Rapportera säkerhetsproblem
-
-Publicera inte autentiseringsuppgifter, personuppgifter eller exploateringsdetaljer i ett publikt GitHub-ärende. Använd en privat kontaktväg eller GitHubs privata vulnerability reporting om det aktiveras.
+Kontrollen stoppar bygget om den hittar vanliga typer av känsliga filer eller uppgifter.
