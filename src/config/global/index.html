@@ -1,0 +1,239 @@
+<div class="panel panel-default">
+  <div class="panel-heading"><h3 class="panel-title">Besöksstatistik – globala inställningar</h3></div>
+  <div class="panel-body">
+    <p class="help-block">Inställningarna gäller alla instanser av widgeten på webbplatsen. Piwik-anslutningen hämtas från Sitevisions centrala inställningar för Webbanalys.</p>
+
+
+    <fieldset>
+      <legend>Piwik PRO-koppling</legend>
+      <div class="form-group">
+        <label for="pageIdDimension">Händelsedimension för Sitevision PageID</label>
+        <input class="form-control" id="pageIdDimension" name="pageIdDimension" type="text" placeholder="event_custom_dimension_1" />
+        <p class="help-block">Standard är <code>event_custom_dimension_1</code>. Ändra bara om Sitevisions PageID lagras i en annan Piwik PRO event custom dimension.</p>
+      </div>
+    </fieldset>
+
+    <hr>
+    <fieldset>
+      <legend>Standardvisning</legend>
+      <p class="help-block">De här valen gäller alla redaktörer som använder widgeten på webbplatsen. Redaktören kan fortfarande växla sida/gren och period direkt i Dashboard.</p>
+      <div class="form-group">
+        <label for="defaultScope">Visa från början</label>
+        <select class="form-control" id="defaultScope" name="defaultScope">
+          <option value="branch">Denna gren</option>
+          <option value="page">Denna sida</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="defaultPeriod">Standardperiod</label>
+        <select class="form-control" id="defaultPeriod" name="defaultPeriod">
+          <option value="today">Idag</option>
+          <option value="7">7 dagar</option>
+          <option value="30">30 dagar</option>
+          <option value="90">90 dagar</option>
+          <option value="365">365 dagar</option>
+          <option value="previousYear">Förra kalenderåret</option>
+        </select>
+      </div>
+    </fieldset>
+
+    <hr>
+    <fieldset>
+      <legend>Listor</legend>
+      <div class="form-group">
+        <label for="initialRows">Antal rader som visas direkt</label>
+        <select class="form-control" id="initialRows" name="initialRows">
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="moreRows">Antal nya rader vid ”Visa fler”</label>
+        <select class="form-control" id="moreRows" name="moreRows">
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+      </div>
+    </fieldset>
+
+    <hr>
+    <fieldset>
+      <legend>Innehåll i dashboarden</legend>
+      <p class="help-block">Avmarkera bara delar som inte ska visas. Grundläggande sidstatistik visas alltid.</p>
+      <div class="checkbox"><label><input type="checkbox" name="showTopLists" data-value-type="boolean"> Visa mest visade sidor och sidor med låg trafik</label></div>
+      <div class="checkbox"><label><input type="checkbox" name="showZeroViews" data-value-type="boolean"> Visa sidor utan registrerade besök</label></div>
+      <div class="checkbox"><label><input type="checkbox" name="showDevices" data-value-type="boolean"> Visa enheter</label></div>
+      <div class="checkbox"><label><input type="checkbox" name="showCountries" data-value-type="boolean"> Visa länder</label></div>
+      <div class="checkbox"><label><input type="checkbox" name="showDownloads" data-value-type="boolean"> Visa filer som öppnats eller laddats ner</label></div>
+      <div class="checkbox"><label><input type="checkbox" name="showOutlinks" data-value-type="boolean"> Visa externa länkar</label></div>
+      <div class="checkbox"><label><input type="checkbox" name="showCampaigns" data-value-type="boolean"> Visa kampanjer</label></div>
+      <div class="checkbox"><label><input type="checkbox" name="showAiTraffic" data-value-type="boolean"> Visa trafik från AI-tjänster</label></div>
+      <div class="checkbox"><label><input type="checkbox" name="showInsights" data-value-type="boolean"> Visa ”Bra att veta”</label></div>
+    </fieldset>
+
+    <hr>
+    <fieldset>
+      <legend>Filtrering av statistik</legend>
+      <p class="help-block">Filtren tar bort tekniska URL-varianter som annars kan ge dubbletter eller irrelevant statistik. Samma regler används för Piwik-data och Sitevisions sidträd.</p>
+
+      <div class="checkbox">
+        <label><input type="checkbox" name="excludePrintable" data-value-type="boolean"> Filtrera bort <code>.printable</code></label>
+        <p class="help-block">Tar bort utskriftsvarianter av sidor.</p>
+      </div>
+      <div class="checkbox">
+        <label><input type="checkbox" name="excludeQueryString" data-value-type="boolean" data-enables=".svs-query-exceptions"> Filtrera bort querystring (<code>?</code>)</label>
+        <p class="help-block">Rekommenderas normalt. Undantag kan läggas till nedan för sidor där en queryparameter identifierar olika innehåll.</p>
+      </div>
+
+      <div class="svs-query-exceptions" style="margin:1rem 0 1rem 1rem;padding-left:1rem;border-left:3px solid #ddd;">
+        <h4>Undantag för querystring</h4>
+        <p class="help-block">Lägg till sidor där en queryparameter används för att visa olika innehåll som ska redovisas separat. Ange bara parametrar som identifierar innehållet, till exempel <code>jobbid</code>. Kampanjparametrar och andra queryparametrar skapar inte egna innehållsvarianter.</p>
+        <details open style="margin-bottom:.75rem;">
+          <summary><strong>Undantag 1</strong></summary>
+          <fieldset style="margin:.75rem 0 0;padding:0;border:0;">
+            <legend class="sr-only">Querystring-undantag 1</legend>
+            <div class="form-group">
+              <label for="queryExceptionPage1">Sida</label>
+              <input class="form-control" id="queryExceptionPage1" data-types="sv:page,sv:sitePage,sv:article,sv:structurePage" data-component="page-selector" name="queryExceptionPage1" />
+            </div>
+            <div class="form-group">
+              <label for="queryExceptionParams1">Parametrar som identifierar innehållet</label>
+              <input class="form-control" id="queryExceptionParams1" name="queryExceptionParams1" placeholder="jobbid" />
+              <p class="help-block">Flera parametrar anges med kommatecken, till exempel <code>id,variant</code>.</p>
+            </div>
+          </fieldset>
+        </details>
+        <details style="margin-bottom:.75rem;">
+          <summary><strong>Undantag 2</strong></summary>
+          <fieldset style="margin:.75rem 0 0;padding:0;border:0;">
+            <legend class="sr-only">Querystring-undantag 2</legend>
+            <div class="form-group">
+              <label for="queryExceptionPage2">Sida</label>
+              <input class="form-control" id="queryExceptionPage2" data-types="sv:page,sv:sitePage,sv:article,sv:structurePage" data-component="page-selector" name="queryExceptionPage2" />
+            </div>
+            <div class="form-group">
+              <label for="queryExceptionParams2">Parametrar som identifierar innehållet</label>
+              <input class="form-control" id="queryExceptionParams2" name="queryExceptionParams2" placeholder="jobbid" />
+              <p class="help-block">Flera parametrar anges med kommatecken, till exempel <code>id,variant</code>.</p>
+            </div>
+          </fieldset>
+        </details>
+        <details style="margin-bottom:.75rem;">
+          <summary><strong>Undantag 3</strong></summary>
+          <fieldset style="margin:.75rem 0 0;padding:0;border:0;">
+            <legend class="sr-only">Querystring-undantag 3</legend>
+            <div class="form-group">
+              <label for="queryExceptionPage3">Sida</label>
+              <input class="form-control" id="queryExceptionPage3" data-types="sv:page,sv:sitePage,sv:article,sv:structurePage" data-component="page-selector" name="queryExceptionPage3" />
+            </div>
+            <div class="form-group">
+              <label for="queryExceptionParams3">Parametrar som identifierar innehållet</label>
+              <input class="form-control" id="queryExceptionParams3" name="queryExceptionParams3" placeholder="jobbid" />
+              <p class="help-block">Flera parametrar anges med kommatecken, till exempel <code>id,variant</code>.</p>
+            </div>
+          </fieldset>
+        </details>
+        <details style="margin-bottom:.75rem;">
+          <summary><strong>Undantag 4</strong></summary>
+          <fieldset style="margin:.75rem 0 0;padding:0;border:0;">
+            <legend class="sr-only">Querystring-undantag 4</legend>
+            <div class="form-group">
+              <label for="queryExceptionPage4">Sida</label>
+              <input class="form-control" id="queryExceptionPage4" data-types="sv:page,sv:sitePage,sv:article,sv:structurePage" data-component="page-selector" name="queryExceptionPage4" />
+            </div>
+            <div class="form-group">
+              <label for="queryExceptionParams4">Parametrar som identifierar innehållet</label>
+              <input class="form-control" id="queryExceptionParams4" name="queryExceptionParams4" placeholder="jobbid" />
+              <p class="help-block">Flera parametrar anges med kommatecken, till exempel <code>id,variant</code>.</p>
+            </div>
+          </fieldset>
+        </details>
+        <details style="margin-bottom:.75rem;">
+          <summary><strong>Undantag 5</strong></summary>
+          <fieldset style="margin:.75rem 0 0;padding:0;border:0;">
+            <legend class="sr-only">Querystring-undantag 5</legend>
+            <div class="form-group">
+              <label for="queryExceptionPage5">Sida</label>
+              <input class="form-control" id="queryExceptionPage5" data-types="sv:page,sv:sitePage,sv:article,sv:structurePage" data-component="page-selector" name="queryExceptionPage5" />
+            </div>
+            <div class="form-group">
+              <label for="queryExceptionParams5">Parametrar som identifierar innehållet</label>
+              <input class="form-control" id="queryExceptionParams5" name="queryExceptionParams5" placeholder="jobbid" />
+              <p class="help-block">Flera parametrar anges med kommatecken, till exempel <code>id,variant</code>.</p>
+            </div>
+          </fieldset>
+        </details>
+        <details style="margin-bottom:.75rem;">
+          <summary><strong>Undantag 6</strong></summary>
+          <fieldset style="margin:.75rem 0 0;padding:0;border:0;">
+            <legend class="sr-only">Querystring-undantag 6</legend>
+            <div class="form-group">
+              <label for="queryExceptionPage6">Sida</label>
+              <input class="form-control" id="queryExceptionPage6" data-types="sv:page,sv:sitePage,sv:article,sv:structurePage" data-component="page-selector" name="queryExceptionPage6" />
+            </div>
+            <div class="form-group">
+              <label for="queryExceptionParams6">Parametrar som identifierar innehållet</label>
+              <input class="form-control" id="queryExceptionParams6" name="queryExceptionParams6" placeholder="jobbid" />
+              <p class="help-block">Flera parametrar anges med kommatecken, till exempel <code>id,variant</code>.</p>
+            </div>
+          </fieldset>
+        </details>
+        <details style="margin-bottom:.75rem;">
+          <summary><strong>Undantag 7</strong></summary>
+          <fieldset style="margin:.75rem 0 0;padding:0;border:0;">
+            <legend class="sr-only">Querystring-undantag 7</legend>
+            <div class="form-group">
+              <label for="queryExceptionPage7">Sida</label>
+              <input class="form-control" id="queryExceptionPage7" data-types="sv:page,sv:sitePage,sv:article,sv:structurePage" data-component="page-selector" name="queryExceptionPage7" />
+            </div>
+            <div class="form-group">
+              <label for="queryExceptionParams7">Parametrar som identifierar innehållet</label>
+              <input class="form-control" id="queryExceptionParams7" name="queryExceptionParams7" placeholder="jobbid" />
+              <p class="help-block">Flera parametrar anges med kommatecken, till exempel <code>id,variant</code>.</p>
+            </div>
+          </fieldset>
+        </details>
+        <details style="margin-bottom:.75rem;">
+          <summary><strong>Undantag 8</strong></summary>
+          <fieldset style="margin:.75rem 0 0;padding:0;border:0;">
+            <legend class="sr-only">Querystring-undantag 8</legend>
+            <div class="form-group">
+              <label for="queryExceptionPage8">Sida</label>
+              <input class="form-control" id="queryExceptionPage8" data-types="sv:page,sv:sitePage,sv:article,sv:structurePage" data-component="page-selector" name="queryExceptionPage8" />
+            </div>
+            <div class="form-group">
+              <label for="queryExceptionParams8">Parametrar som identifierar innehållet</label>
+              <input class="form-control" id="queryExceptionParams8" name="queryExceptionParams8" placeholder="jobbid" />
+              <p class="help-block">Flera parametrar anges med kommatecken, till exempel <code>id,variant</code>.</p>
+            </div>
+          </fieldset>
+        </details>
+      </div>
+
+      <div class="checkbox">
+        <label><input type="checkbox" name="excludeInloggad" data-value-type="boolean"> Filtrera bort URL:er som innehåller <code>inloggad</code></label>
+        <p class="help-block">Tar bort specialvarianter som används för inloggade redaktörer.</p>
+      </div>
+      <div class="checkbox">
+        <label><input type="checkbox" name="excludeSystemParts" data-value-type="boolean"> Filtrera bort tekniska systemdelar</label>
+        <p class="help-block">Tar bort mappar och sidor där ett helt URL-segment heter <code>system</code> eller börjar med <code>system--</code>, inklusive allt under dem. Vanliga sidor som <code>system-i-kommunen</code> påverkas inte.</p>
+      </div>
+      <div class="form-group">
+        <label for="customExcludePatterns">Egna exkluderingsmönster</label>
+        <textarea class="form-control" id="customExcludePatterns" name="customExcludePatterns" rows="4" placeholder=".preview&#10;annan-teknisk-sokvag"></textarea>
+        <p class="help-block">Ett mönster per rad. Matchningen görs som delsträng och är inte skiftlägeskänslig. Lämna tomt om inga extra filter behövs.</p>
+      </div>
+    </fieldset>
+
+    <hr>
+    <fieldset>
+      <legend>Felsökning</legend>
+      <div class="checkbox">
+        <label><input type="checkbox" name="showDiagnostics" data-value-type="boolean"> Visa teknisk diagnostik i widgeten</label>
+        <p class="help-block">Visar detaljer om Piwik-frågor, filter, svarstider och datakvalitet. Låt vara avstängd för vanliga redaktörer och aktivera vid felsökning.</p>
+      </div>
+    </fieldset>
+  </div>
+</div>
