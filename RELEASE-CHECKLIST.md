@@ -1,38 +1,34 @@
-# Release-checklista
+# Checklista för en ny version
 
-## 1. Ny ren arbetsmapp
+Den här checklistan är till för den som utvecklar eller publicerar widgeten.
 
-Skapa alltid en ny mapp för varje version. Kopiera eller packa upp endast den aktuella releasekällan.
+## 1. Börja i en ren mapp
 
-Lägg aldrig en ny version ovanpå en äldre arbetsmapp.
+Skapa en ny mapp för varje version. Lägg inte nya filer ovanpå en gammal arbetsmapp.
 
-## 2. Kontrollera versionsnummer
+## 2. Kontrollera versionen
 
-Följande ska ha samma version:
+Samma versionsnummer ska finnas i:
 
 - `manifest.json`
 - `package.json`
 - `package-lock.json`
 - `APP_VERSION` i `src/index.js`
 
-`npm.cmd run build` kör kontrollen automatiskt.
+Kontrollen görs automatiskt vid build.
 
-## 3. Installera reproducerbart
+## 3. Installera beroenden
 
 ```powershell
 npm.cmd ci
 ```
 
-Använd `npm ci`, inte en gammal `node_modules`-mapp från en tidigare version.
-
-## 4. Säkerhetskontroll
+## 4. Kör kontrollerna
 
 ```powershell
 npm.cmd audit
 npm.cmd run check
 ```
-
-Kontrollera särskilt att inga utvecklaruppgifter, `.dev_properties.json`, `.env`, tokens, privata nycklar eller interna miljöuppgifter ingår.
 
 ## 5. Bygg
 
@@ -40,13 +36,11 @@ Kontrollera särskilt att inga utvecklaruppgifter, `.dev_properties.json`, `.env
 npm.cmd run build
 ```
 
-Builden ska avslutas med `Compression successful`.
+Bygget ska avslutas med `Compression successful`.
 
 ## 6. Testa i Sitevision
 
-Importera ZIP-filen från `dist`.
-
-Aktivera uttryckligen den nya versionen i Sitevision innan test.
+Importera ZIP-filen från `dist` och aktivera den nya versionen.
 
 Testa minst:
 
@@ -55,28 +49,27 @@ Testa minst:
 - en större gren
 - periodbyte
 - Visa fler
-- externa länkar och filer
-- att progressindikeringen avslutas
-- att apploggen inte innehåller känslig information
+- externa länkar
+- filer
+- att laddningen avslutas
 
-## 7. GitHub
+## 7. Publicera källkoden
 
-Kontrollera alltid före commit:
+Kontrollera att följande inte finns med:
 
-```powershell
-git status
-```
+- `node_modules`
+- `dist`
+- `.dev_properties.json`
+- `.env`
+- certifikat
+- privata nycklar
 
-`node_modules`, `dist`, `.dev_properties.json`, `.env`, certifikat och privata nycklar ska inte finnas bland filerna som committas. Se även `CERTIFICATE.md`.
+## 8. Signera
 
-## 8. Signering
-
-Signera först den verifierade releasekandidaten:
+När versionen är testad:
 
 ```powershell
 npm.cmd run sign
 ```
 
-Använd ett Sitevision-signerat produktionscertifikat som är installerat som betrott Addon certificate på målwebbplatsen.
-
-Signera inte en annan lokal build än den som funktionstestats.
+Testa den signerade versionen innan den används i produktion.
