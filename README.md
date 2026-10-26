@@ -22,13 +22,27 @@ Standardperioden är 30 dagar.
 Du behöver:
 
 - Sitevision med stöd för WebApps 2 och dashboard-widgets
-- Piwik PRO kopplat till Sitevision
+- Sitevision Webbanalys med Piwik PRO
+- tillägget **Piwik PRO - RESTApi** (`sv-piwik-pro-backend`)
 - behörighet att hantera tillägg i Sitevision
-- ett Sitevision-godkänt certifikat om du ska använda widgeten i produktion
+- ett Sitevision-godkänt certifikat om widgeten ska användas i produktion
+
+### Viktigt: tillåt POST i Piwik PRO - RESTApi
+
+Widgeten hämtar statistik med POST-anrop. Därför måste tillägget **Piwik PRO - RESTApi** tillåta både GET och POST för inloggade användare.
+
+I Sitevision:
+
+1. Gå till **Tillägg**.
+2. Öppna `sv-piwik-pro-backend`.
+3. Välj **Egenskaper** och sedan **Restriktioner**.
+4. För **Alla inloggade användare**, tillåt både **GET** och **POST**.
+
+Om POST inte är tillåtet får widgeten fel **HTTP 405** och statistiken kan inte hämtas.
 
 ## Installera
 
-Se [INSTALLATION.md](INSTALLATION.md) för steg-för-steg-instruktioner.
+Se [INSTALLATION.md](INSTALLATION.md) för hela installationen, inklusive hur du skaffar certifikat, bygger och signerar widgeten.
 
 ## Inställningar
 
@@ -43,20 +57,25 @@ I widgetens globala inställningar kan du bland annat välja:
 
 Standard för PageID-dimensionen är `event_custom_dimension_1`.
 
-Kontrollera alltid att den dimensionen stämmer i er Piwik PRO-konfiguration.
+Kontrollera att den dimensionen stämmer i er Piwik PRO-konfiguration.
 
 ## Bygga från källkod
 
-Packa upp eller klona projektet i en ren mapp och kör:
+Packa upp eller klona projektet i en ny, ren mapp och kör:
 
 ```powershell
 npm.cmd ci
 npm.cmd run build
 ```
 
-Den färdiga ZIP-filen skapas i mappen `dist`.
+På macOS eller Linux kan du använda:
 
-Bygg alltid varje version i en ny, ren mapp. Då minskar risken att gamla filer följer med av misstag.
+```bash
+npm ci
+npm run build
+```
+
+Den färdiga ZIP-filen skapas i mappen `dist`.
 
 ## Säkerhet och integritet
 
