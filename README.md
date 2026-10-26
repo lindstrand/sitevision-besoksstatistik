@@ -1,59 +1,67 @@
 # Besöksstatistik för Sitevision
 
-Besöksstatistik är en Sitevision **WebApps 2 Widget** för redaktörsstatistik från Sitevisions centrala Piwik PRO-integration.
+Besöksstatistik är en dashboard-widget för Sitevision. Den visar besöksstatistik från Piwik PRO direkt i Sitevision, så att redaktörer kan se hur en sida eller en hel gren används.
 
-Version 1.8.0 är den första stabila WebApps 2-releasen.
+## Det här visar widgeten
 
-## Funktioner
-
-- statistik för aktuell sida eller gren
-- perioder från idag till ett år, föregående år och egna datum
-- 30 dagar som standardperiod
-- mest visade sidor, låg trafik och sidor utan registrerade besök
+- sidvisningar, besök och unika besökare
+- mest visade sidor
+- sidor med låg trafik
+- sidor utan registrerade besök
 - enheter och länder
-- trafikkällor med begripliga namn, till exempel Facebook och Instagram
-- kampanjer och AI-trafik
-- externa länkar och filer
-- teknisk diagnostik som kan aktiveras vid felsökning
+- var besökarna kommer från
+- kampanjer
+- trafik från AI-tjänster
+- klick på externa länkar
+- klick på filer
 
-## Sitevision
+Standardperioden är 30 dagar.
 
-Widgeten är en bundlad WebApps 2-app (`type: Widget`, `bundled: true`) och byggs med Sitevisions `sitevision-scripts`. Den renderas klientbaserat och använder Sitevisions Public API via `@sitevision/api`.
+## Krav
 
-## Bygg alltid från en ren mapp
+Du behöver:
 
-Blanda aldrig en ny release med en äldre arbetsmapp.
+- Sitevision med stöd för WebApps 2 och dashboard-widgets
+- Piwik PRO kopplat till Sitevision
+- behörighet att hantera tillägg i Sitevision
+- ett Sitevision-godkänt certifikat om du ska använda widgeten i produktion
+
+## Installera
+
+Se [INSTALLATION.md](INSTALLATION.md) för steg-för-steg-instruktioner.
+
+## Inställningar
+
+I widgetens globala inställningar kan du bland annat välja:
+
+- om sida eller gren ska vara förvald
+- standardperiod
+- hur många rader som ska visas
+- vilka delar av statistiken som ska visas
+- vilka URL:er som ska filtreras bort
+- vilken Piwik PRO-dimension som innehåller Sitevisions PageID
+
+Standard för PageID-dimensionen är `event_custom_dimension_1`.
+
+Kontrollera alltid att den dimensionen stämmer i er Piwik PRO-konfiguration.
+
+## Bygga från källkod
+
+Packa upp eller klona projektet i en ren mapp och kör:
 
 ```powershell
 npm.cmd ci
 npm.cmd run build
 ```
 
-Builden kör versions- och säkerhetskontroll innan Sitevisions build startar. Importpaketet skapas i `dist`.
+Den färdiga ZIP-filen skapas i mappen `dist`.
 
-## Konfiguration
-
-Globala inställningar innehåller bland annat:
-
-- standardläge sida/gren
-- standardperiod
-- antal rader
-- vilka statistikpaneler som visas
-- URL-filter
-- querystring-undantag
-- Piwik PRO-dimensionen som innehåller Sitevision PageID
-- teknisk diagnostik
-
-Standard för PageID-dimension är `event_custom_dimension_1`.
-
-De URL-filter som passar Hässleholms kommuns installation ska granskas innan widgeten används i en annan organisation.
+Bygg alltid varje version i en ny, ren mapp. Då minskar risken att gamla filer följer med av misstag.
 
 ## Säkerhet och integritet
 
-Piwik PRO-autentisering hanteras av Sitevisions centrala webbanalyskoppling. Widgeten ska inte innehålla Client ID, Client Secret eller andra Piwik-uppgifter.
+Widgeten innehåller inga Piwik PRO-lösenord eller API-nycklar. Anslutningen till Piwik PRO går via Sitevisions centrala integration.
 
-Loggningen använder Sitevisions `LogUtil` och loggar endast appversion, generell feltyp och svarstid. Råa Piwik-svar, URL-parametrar, användaruppgifter, IP-adresser och autentiseringsuppgifter ska inte loggas.
+Widgeten använder Sitevisions `LogUtil` för teknisk loggning. Loggen innehåller inte rå Piwik-data, IP-adresser, användarnamn eller autentiseringsuppgifter.
 
-Teknisk diagnostik är avstängd som standard.
-
-Se `SECURITY.md`, `CERTIFICATE.md` och `RELEASE-CHECKLIST.md`.
+Se [SECURITY.md](SECURITY.md) för mer information.
