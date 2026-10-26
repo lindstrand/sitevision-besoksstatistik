@@ -2,7 +2,7 @@
 
 Besöksstatistik är en Sitevision **WebApps 2 Widget** för redaktörsstatistik från Sitevisions centrala Piwik PRO-integration.
 
-Version 1.8.0 är den första stabila WebApps 2-releasen. Den bygger på den verifierade 1.7.15-kandidaten och behåller dess laddnings- och statistikflöde.
+Version 1.8.0 är den första stabila WebApps 2-releasen.
 
 ## Funktioner
 
