@@ -1,34 +1,19 @@
-# Certifikat och signering
+# Certifikat
 
-## Hässleholms kommuns certifikat
+Sitevision kräver att WebApps som används i produktion är signerade med ett Sitevision-godkänt certifikat.
 
-Hässleholms kommun använder ett eget Sitevision-signerat produktionscertifikat för sina appar. Certifikatet kan användas för flera av kommunens egna Sitevision-appar.
+## Om du bygger widgeten själv
 
-Certifikatfiler, privata nycklar och signeringsuppgifter ska **inte** lagras i detta GitHub-repository i den här releasen. Även en publik certifikatdel publiceras först efter ett separat uttryckligt beslut.
-
-## Distribution till andra kommuner
-
-En signerad release kan installeras på en annan Sitevision-webbplats om mottagaren uttryckligen väljer att lita på det certifikat som releasen är signerad med. Hur den publika certifikatdelen distribueras ska därför beslutas separat från källkoden.
-
-För vänkommuner kan installation och certifikathantering ske manuellt i samråd med Hässleholms kommun. Om widgeten senare får bredare spridning bör ett separat produktionscertifikat för modulen övervägas.
-
-## Förbjudet i GitHub
-
-Följande får aldrig committas:
-
-- privata nycklar
-- certifikatfiler som inte uttryckligen beslutats vara publika
-- `.dev_properties.json`
-- `.env`-filer
-- Sitevision-inloggningar
-- tokens eller andra signeringshemligheter
-
-## Signering
-
-Signera endast en version som redan har byggts och funktionstestats från en ren arbetsmapp:
+Signera den med ett certifikat som tillhör ert Sitevision-team:
 
 ```powershell
 npm.cmd run sign
 ```
 
-`presign` kör samma versions- och säkerhetskontroller som builden.
+Certifikatet som används vid signeringen måste också finnas bland webbplatsens betrodda tilläggscertifikat.
+
+## Viktigt
+
+Lägg aldrig privata nycklar, inloggningsuppgifter eller andra hemligheter i GitHub.
+
+Det här projektet innehåller inget certifikat.
