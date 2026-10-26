@@ -1,0 +1,27 @@
+{
+  "id": "hassleholmPiwikDashboardInternal",
+  "version": "1.8.0",
+  "type": "Widget",
+  "name": {
+    "sv": "Besöksstatistik",
+    "en": "Visitor statistics"
+  },
+  "description": {
+    "sv": "Dashboardwidget för redaktörsstatistik via Sitevisions Piwik PRO-backend. WebApps 2, optimerad för snabb och tillgänglig användning.",
+    "en": "Dashboard widget for editor analytics using Sitevision's Piwik PRO backend."
+  },
+  "author": "Hässleholms kommun",
+  "bundled": true,
+  "maxUploadSizeInMB": 0,
+  "requiredLibs": {
+    "react": "18.3.1"
+  },
+  "supportedWidgetSizes": [
+    "medium",
+    "large",
+    "extra_large"
+  ],
+  "supportedWidgetContexts": [
+    "page"
+  ]
+}
