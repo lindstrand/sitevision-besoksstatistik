@@ -2,6 +2,8 @@
 
 Den här guiden beskriver hela vägen från Piwik PRO och certifikat till en installerad widget i Sitevision.
 
+Du behöver inte ha arbetat med Sitevision-utveckling tidigare. Följ stegen i ordning.
+
 ## 1. Kontrollera Piwik PRO i Sitevision
 
 Widgeten använder Sitevisions egen koppling till Piwik PRO.
@@ -27,17 +29,13 @@ GET är normalt redan tillåtet. Om POST saknas får widgeten **HTTP 405** och s
 
 WebApps som ska användas på en produktionswebbplats måste signeras med ett certifikat som är godkänt av Sitevision.
 
-Gör så här:
-
 1. Gå till [developer.sitevision.se](https://developer.sitevision.se/).
 2. Logga in eller skapa ett konto.
-3. Bli medlem i ett team. Certifikat i Sitevision hör alltid till ett team.
+3. Bli medlem i ett team.
 4. Öppna teamets sida.
 5. Skapa ett certifikat.
 
-När du skapar certifikatet anger du ett namn för certifikatet. Sitevision signerar certifikatet så att det kan användas för WebApps i produktion.
-
-Ett av teamets certifikat är valt som standard. Om du inte anger något certifikatnamn när du signerar används standardcertifikatet.
+Certifikatet hör till teamet. Ett av teamets certifikat är standardcertifikat och används om du inte väljer något annat när du signerar.
 
 ## 3. Lägg certifikatet på webbplatsen
 
@@ -49,73 +47,152 @@ I Sitevision:
 2. Gå till **Tilläggscertifikat**.
 3. Lägg till certifikatet bland de betrodda certifikaten.
 
-Det certifikat som används när widgeten signeras måste finnas här, annars går den signerade widgeten inte att använda på webbplatsen.
+Webbplatsen måste lita på samma certifikat som används när widgeten signeras.
 
-## 4. Hämta källkoden
+## 4. Installera Node.js
 
-Ladda ner källkoden från GitHub och packa upp den i en ny, tom mapp.
+För att bygga widgeten på din dator behöver du **Node.js**.
 
-Du behöver Node.js och npm installerat.
+Node.js innehåller också **npm**, som används för att hämta de paket som projektet behöver och för att köra byggkommandona.
 
-## 5. Installera beroenden
+Sitevisions nuvarande utvecklingsverktyg kräver Node.js 20.9 eller senare.
 
-I Windows PowerShell:
+1. Gå till [nodejs.org](https://nodejs.org/).
+2. Installera en aktuell LTS-version av Node.js.
+3. Använd standardvalen i installationen.
+
+När installationen är klar öppnar du **PowerShell** i Windows.
+
+Skriv:
+
+```powershell
+node --version
+npm --version
+```
+
+Om båda kommandona visar ett versionsnummer är installationen klar.
+
+Exempel:
+
+```text
+v22.x.x
+10.x.x
+```
+
+Versionsnumren behöver inte vara exakt samma som i exemplet.
+
+## 5. Hämta källkoden
+
+På GitHub väljer du:
+
+**Code → Download ZIP**
+
+Packa upp ZIP-filen i en ny mapp.
+
+Du behöver inte ha Git installerat för att bygga widgeten.
+
+## 6. Öppna PowerShell i projektmappen
+
+Det enklaste i Windows är att öppna den uppackade projektmappen i Utforskaren.
+
+Klicka sedan i adressfältet, skriv:
+
+```text
+powershell
+```
+
+och tryck Enter.
+
+Då öppnas PowerShell direkt i rätt mapp.
+
+Du kan också öppna PowerShell först och gå till mappen med `cd`.
+
+Exempel:
+
+```powershell
+cd C:\Users\dittnamn\Downloads\sitevision-besoksstatistik
+```
+
+Kontrollera att du är i rätt mapp. Där ska bland annat `package.json`, `manifest.json` och mappen `src` finnas.
+
+## 7. Installera projektets paket
+
+Kör:
 
 ```powershell
 npm.cmd ci
 ```
 
-På macOS eller Linux:
+Kommandot läser `package-lock.json` och installerar de paket som behövs för att bygga widgeten.
 
-```bash
-npm ci
-```
+Det kan ta en stund första gången.
 
-## 6. Bygg widgeten
+Varningar om äldre beroenden kan förekomma. Det viktiga är att kommandot avslutas utan fel.
 
-I Windows:
+## 8. Bygg widgeten
+
+Kör:
 
 ```powershell
 npm.cmd run build
 ```
 
-På macOS eller Linux:
+Bygget:
 
-```bash
-npm run build
+1. kontrollerar versionsnumret
+2. kör projektets säkerhetskontroll
+3. kompilerar JavaScript och CSS
+4. skapar en Sitevision-ZIP
+
+När bygget lyckas skapas mappen:
+
+```text
+dist
 ```
 
-Bygget kör också projektets versions- och säkerhetskontroll.
+Där finns den byggda ZIP-filen.
 
-När bygget är klart finns ZIP-filen i mappen `dist`.
+En lyckad build avslutas normalt med:
 
-## 7. Signera widgeten
+```text
+Compression successful
+```
 
-I Windows:
+Den osignerade ZIP-filen kan användas i en utvecklingsmiljö som tillåter osignerade appar.
+
+För produktion behöver appen signeras.
+
+## 9. Signera widgeten
+
+Stå kvar i samma PowerShell-fönster och kör:
 
 ```powershell
 npm.cmd run sign
 ```
 
-På macOS eller Linux:
-
-```bash
-npm run sign
-```
-
 Du får ange användarnamn och lösenord för developer.sitevision.se.
 
-Du får också frågan:
+Sedan får du frågan:
 
 ```text
 Certificate name for signing (blank for default)
 ```
 
-Tryck Enter om du vill använda teamets standardcertifikat. Annars anger du namnet på det certifikat du vill använda.
+Tryck Enter om du vill använda teamets standardcertifikat.
 
-När signeringen lyckas skapas en signerad ZIP-fil i `dist`.
+Om du vill använda ett annat certifikat skriver du certifikatets namn.
 
-## 8. Installera den signerade widgeten
+När signeringen lyckas visas ett meddelande som liknar:
+
+```text
+Signing successful
+```
+
+Den signerade ZIP-filen skapas i `dist` och har normalt `-signed` i filnamnet.
+
+Det är den signerade filen du ska använda i produktion.
+
+## 10. Installera den signerade widgeten
 
 1. Öppna **Tillägg** i Sitevision.
 2. Skapa eller välj tillägget där widgeten ska ligga.
@@ -123,7 +200,9 @@ När signeringen lyckas skapas en signerad ZIP-fil i `dist`.
 4. Aktivera den nya versionen.
 5. Lägg till widgeten i en dashboard.
 
-## 9. Kontrollera widgetens inställningar
+Glöm inte att aktivera den importerade versionen.
+
+## 11. Kontrollera widgetens inställningar
 
 Viktigast är:
 
@@ -141,7 +220,7 @@ event_custom_dimension_1
 
 Om er Piwik PRO-installation använder en annan dimension behöver den ändras i widgetens globala inställningar.
 
-## 10. Testa
+## 12. Testa
 
 Testa gärna:
 
@@ -153,3 +232,15 @@ Testa gärna:
 Kontrollera att statistiken laddas klart och att siffrorna ser rimliga ut.
 
 Om nästan all statistik misslyckas och den tekniska diagnostiken visar **HTTP 405**, kontrollera först att POST är tillåtet i `sv-piwik-pro-backend`.
+
+## macOS och Linux
+
+Guiden ovan använder PowerShell eftersom den är skriven för Windows.
+
+På macOS och Linux använder du Terminal och samma npm-kommandon utan `.cmd`:
+
+```bash
+npm ci
+npm run build
+npm run sign
+```
