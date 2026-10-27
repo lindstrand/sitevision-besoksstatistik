@@ -40,6 +40,12 @@ I Sitevision:
 
 Om POST inte är tillåtet får widgeten fel **HTTP 405** och statistiken kan inte hämtas.
 
+## Använd tillsammans med Skapa kampanjlänk
+
+Besöksstatistik passar bra tillsammans med [Skapa kampanjlänk för Sitevision](https://github.com/lindstrand/Sitevision-kampanj).
+
+**Skapa kampanjlänk** hjälper redaktörer att skapa enhetliga UTM-länkar och QR-koder. **Besöksstatistik** kan sedan visa kampanjtrafiken direkt i Sitevisions dashboard.
+
 ## Installera
 
 Se [INSTALLATION.md](INSTALLATION.md) för hela installationen, inklusive hur du skaffar certifikat, bygger och signerar widgeten.
