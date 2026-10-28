@@ -1,5 +1,13 @@
 # Ändringslogg
 
+## 1.8.2
+
+- Slår ihop samma Sitevision-fil när den nås via flera domäner men har samma `/download/...`-sökväg.
+- Visar en försiktig nedre gräns för unika filklick när flera domänvarianter har slagits ihop.
+- Förbättrar visningen av långa externa länkar genom att behålla både början och slutet av adressen.
+- Visar ReadSpeaker-länkar med namnet på sidan som lästes upp när det kan utläsas ur länken.
+- Ändrar inte grenfiltrering eller övrig statistiklogik.
+
 ## 1.8.1
 
 - Rättar grenstatistiken så att vanliga grenar alltid avgränsas med Sitevision-ID:n.
