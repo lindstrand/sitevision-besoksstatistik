@@ -1,5 +1,13 @@
 # Ändringslogg
 
+## 1.8.1
+
+- Rättar grenstatistiken så att vanliga grenar alltid avgränsas med Sitevision-ID:n.
+- Tar bort URL-prefix som alternativt grenfilter.
+- Historisk trafik följer därmed samma sida även om sidans URL har ändrats.
+- Förhindrar att "Denna gren" kan visa färre sidvisningar än grensidan själv på grund av olika avgränsningsmetoder.
+- Övrig statistiklogik och frågor, inklusive AI-trafik, är oförändrade.
+
 ## 1.8.0
 
 - Första publicerade versionen.
