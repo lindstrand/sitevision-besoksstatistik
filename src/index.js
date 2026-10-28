@@ -10,7 +10,7 @@ import nodeFilterUtil from '@sitevision/api/server/NodeFilterUtil';
 import nodeIteratorUtil from '@sitevision/api/server/NodeIteratorUtil';
 import restAppInvokerFactory from '@sitevision/api/server/RestAppInvokerFactory';
 
-const APP_VERSION = '1.8.0';
+const APP_VERSION = '1.8.1';
 const LOG_PREFIX = `[Besöksstatistik ${APP_VERSION}]`;
 
 const API = {
@@ -61,11 +61,11 @@ function logDebug(message) {
    * laddningsstatus direkt, därför hämtar klienten själva statistiken från den
    * fristående routen /statistics.
    *
-   * Grenstatistik använder hybridfilter: URL-prefix när sidträdet följer samma
-   * URL-struktur och Sitevision-ID:n när det behövs för att behålla korrektheten.
+   * Grenstatistik använder Sitevision-ID:n för samtliga publicerade sidor i grenen.
+   * Det gör att historisk trafik följer sidan även om dess URL har ändrats.
    *
    * Utvecklare: Magnus Lindstrand, Hässleholms kommun
-   * Version: 1.8.0
+   * Version: 1.8.1
    */
   var BACKEND='/rest-api/sv-piwik-pro-backend';
   var QUERY_ROUTE='/ai-tool/query'; // Endpointnamn tillhandahållet av Sitevision.
@@ -368,58 +368,6 @@ function logDebug(message) {
   function siteEventFilter(origin){
     var conditions=[];
     if(origin)conditions.push({column_id:'event_url',condition:{operator:'starts_with',value:origin}});
-    addUrlExclusions(conditions);
-    return {operator:'and',conditions:conditions};
-  }
-
-  function urlPathOnly(url){
-    var s=String(url||'');
-    var m=s.match(/^https?:\/\/[^\/]+(\/[^?#]*)?/i);
-    var path=m?(m[1]||'/'):s.replace(/[?#].*$/,'');
-    if(path.length>1)path=path.replace(/\/+$/,'');
-    return path||'/';
-  }
-  function branchUrlsFollowTree(branchUrl,pages){
-    var root=urlPathOnly(branchUrl);
-    if(!root||!pages||!pages.length)return false;
-    var prefix=root==='/'?'/':root+'/';
-    for(var i=0;i<pages.length;i++){
-      var p=urlPathOnly(pages[i].url);
-      if(p!==root&&p.indexOf(prefix)!==0)return false;
-    }
-    return true;
-  }
-  function branchUrlPageFilter(branchUrl){
-    var root=String(branchUrl||'').replace(/\/+$/,'');
-    var content={operator:'or',conditions:[
-      {column_id:'event_url',condition:{operator:'eq',value:root}},
-      {column_id:'event_url',condition:{operator:'starts_with',value:root+'/'} }
-    ]};
-    var conditions=[{column_id:'event_type',condition:{operator:'eq',value:1}},content];
-    addUrlExclusions(conditions);
-    return {operator:'and',conditions:conditions};
-  }
-  function branchUrlEventFilter(branchUrl){
-    var root=String(branchUrl||'').replace(/\/+$/,'');
-    var conditions=[{operator:'or',conditions:[
-      {column_id:'event_url',condition:{operator:'eq',value:root}},
-      {column_id:'event_url',condition:{operator:'starts_with',value:root+'/'} }
-    ]}];
-    addUrlExclusions(conditions);
-    return {operator:'and',conditions:conditions};
-  }
-
-
-  // Avgränsa en gren med URL i stället för ett stort OR-filter med sid-ID:n.
-  // Grenens egen sida matchas exakt och undersidor matchas med prefix + '/'.
-  // Det ger ett litet, stabilt filter även för stora grenar.
-  function branchUrlFilter(branchUrl){
-    var base=String(branchUrl||'').replace(/\/$/,'');
-    var content={operator:'or',conditions:[
-      {column_id:'event_url',condition:{operator:'eq',value:base}},
-      {column_id:'event_url',condition:{operator:'starts_with',value:base+'/'}}
-    ]};
-    var conditions=[{column_id:'event_type',condition:{operator:'eq',value:1}},content];
     addUrlExclusions(conditions);
     return {operator:'and',conditions:conditions};
   }
@@ -1197,22 +1145,12 @@ function logDebug(message) {
     var treeMs=Date.now()-phaseStart;
     if(isSiteRoot&& !detectedOrigin.ok)return res.send(css()+'<div class="svs"><div class="svs-head"><div><h2 class="env-ui-text-heading">Besöksstatistik</h2><div class="svs-sub">Denna gren</div></div></div>'+modeControls(scope,d,canUseBranch)+dateControls(d,scope)+'<div class="svs-error"><strong>Webbplatsens statistik kunde inte avgränsas.</strong><p>Försök igen om en stund.</p></div></div>');
     // Startsidan representerar hela aktuell site och filtreras på dess Piwik-origin.
-    // För vanliga grenar väljer vi automatiskt den enklaste säkra avgränsningen:
-    // URL-prefix när hela Sitevision-grenen faktiskt följer samma URL-struktur, annars sid-ID:n.
-    // Detta undviker mycket stora ID-filter på normala publika grenar men behåller korrektheten
-    // på exempelvis intranät där sidträdet och URL-strukturen kan skilja sig.
-    var branchPiwikUrl='',branchUrlResult=null,useBranchUrl=false;
+    // Vanliga grenar avgränsas alltid med Sitevision-ID:n. Det ger samma identitet
+    // som sidläget och behåller historisk trafik även om en sida har bytt URL.
+    var branchUrlMs=0,branchUrlResult=null;
     phaseStart=Date.now();
-    if(!isSiteRoot){
-      branchUrlResult=discoverPageUrl(rest,d,pg.id);
-      branchPiwikUrl=branchUrlResult.ok?branchUrlResult.url:'';
-      var localBranchUrl=getOnlinePageInfo(pg.node).url;
-      useBranchUrl=!!branchPiwikUrl&&branchUrlsFollowTree(localBranchUrl,tree.pages);
-    }
-    var branchUrlMs=Date.now()-phaseStart;
-    phaseStart=Date.now();
-    var filter=isSiteRoot?siteUrlFilter(activeOrigin):(useBranchUrl?branchUrlPageFilter(branchPiwikUrl):branchIdFilter(ids));
-    var eventScopeB=isSiteRoot?siteEventFilter(activeOrigin):(useBranchUrl?branchUrlEventFilter(branchPiwikUrl):branchEventFilter(ids));
+    var filter=isSiteRoot?siteUrlFilter(activeOrigin):branchIdFilter(ids);
+    var eventScopeB=isSiteRoot?siteEventFilter(activeOrigin):branchEventFilter(ids);
     var filterMs=Date.now()-phaseStart;
     if(coreOnly){
       // Första steget ska vara litet och pålitligt. Det ger redaktören användbar statistik
@@ -1272,7 +1210,7 @@ function logDebug(message) {
       var requestSoFarMs=Date.now()-requestStart;
       var knownPhaseMs=configMs+contextMs+branchCheckMs+originLookupMs+treeMs+branchUrlMs+filterMs+piwikMainMs+comparisonMs+processingMs+renderMs;
       var unaccountedMs=Math.max(0,requestSoFarMs-knownPhaseMs);
-      hb+='<details class="svs-diag"><summary>Teknisk diagnostik</summary><p>Läge: Denna gren</p><p>Aktuell sida: '+esc(pg.id)+' · '+esc(pg.type)+'</p><p>Aktuell site: '+esc(site.siteName||site.siteId)+'</p><p>Piwik-filter: '+esc(isSiteRoot?('Aktuell site: '+activeOrigin):(useBranchUrl?('Grenens URL-struktur: '+branchPiwikUrl):('Sitevision-ID:n i grenen, kompakt filter: '+ids.length)))+'</p><p>Publicerade sid-ID:n: '+ids.length+'</p><h4>Tidsprofil för hela serverkedjan</h4><p>Inställningar och period: '+configMs+' ms</p><p>Aktuell sida, site och backend: '+contextMs+' ms</p><p>Kontroll om sidan har en gren: '+branchCheckMs+' ms</p><p>Identifiera webbplats-origin i Piwik: '+originLookupMs+' ms · '+(detectedOrigin?('HTTP '+detectedOrigin.statusCode):'ej frågad')+'</p><p>Läsa Sitevision-grenen: '+treeMs+' ms · '+tree.visited+' noder besökta</p><p>Identifiera grenens Piwik-URL: '+branchUrlMs+' ms'+(branchUrlResult?' · HTTP '+branchUrlResult.statusCode:'')+'</p><p>Bygga filter: '+filterMs+' ms</p><p>Piwik-frågor för aktuell gren: '+piwikMainMs+' ms</p><p>Jämförelse mot hela webbplatsen: '+comparisonMs+' ms</p><p>Bearbeta statistikresultat: '+processingMs+' ms</p><p>Bygga HTML: '+renderMs+' ms</p><p>Övrig uppmätt tid: '+unaccountedMs+' ms</p><p><strong>Totalt hittills: '+requestSoFarMs+' ms</strong></p><h4>Piwik-frågor</h4><p>Översikt: '+diagResult(totalsB)+'</p><p>Sidor: '+diagResult(pages)+'</p><p>Enheter: '+diagResult(devicesB)+'</p><p>Länder: '+diagResult(countriesB)+'</p><p>Källor i grenen: '+(sourcesB?sourcesB.ms+' ms · HTTP '+sourcesB.statusCode:'ej frågad')+'</p><p>Filer: '+(downloadsB?downloadsB.ms+' ms · HTTP '+downloadsB.statusCode:'ej frågad')+'</p><p>Externa länkar: '+(outlinksB?outlinksB.ms+' ms · HTTP '+outlinksB.statusCode:'ej frågad')+'</p><p>Kampanjer: '+(campaignsB?campaignsB.ms+' ms · HTTP '+campaignsB.statusCode:'ej frågad')+'</p><p>AI-trafik: '+(aiTrafficB?aiTrafficB.ms+' ms · HTTP '+aiTrafficB.statusCode:'ej frågad')+'</p><p>Nätverk för datakvalitet: '+(trafficQualityB?trafficQualityB.ms+' ms · HTTP '+trafficQualityB.statusCode:'ej frågad')+'</p><p>Querystring-varianter: '+(variantResult?variantResult.ms+' ms · HTTP '+variantResult.statusCode:'ej frågad')+'</p><p>Jämförelse webbplats · enheter: '+(siteDevices?siteDevices.ms+' ms · HTTP '+siteDevices.statusCode:'ej frågad')+'</p><p>Jämförelse webbplats · länder: '+(siteCountries?siteCountries.ms+' ms · HTTP '+siteCountries.statusCode:'ej frågad')+'</p><p>Jämförelse webbplats · källor: '+(siteSources?siteSources.ms+' ms · HTTP '+siteSources.statusCode:'ej frågad')+'</p>'+countryDiagnostics(countriesB)+networkDiagnostics(trafficQualityB)+'<p>PageID-dimension: '+esc(PAGE_ID_DIM)+'</p><p>Filter: printable '+(excludeSettings.printable?'på':'av')+', querystring '+(excludeSettings.queryString?'på':'av')+', inloggad '+(excludeSettings.inloggad?'på':'av')+', systemdelar '+(excludeSettings.systemParts?'på':'av')+', egna mönster '+excludeSettings.customPatterns.length+', querystring-undantag '+excludeSettings.queryExceptions.length+'</p></details>';
+      hb+='<details class="svs-diag"><summary>Teknisk diagnostik</summary><p>Läge: Denna gren</p><p>Aktuell sida: '+esc(pg.id)+' · '+esc(pg.type)+'</p><p>Aktuell site: '+esc(site.siteName||site.siteId)+'</p><p>Piwik-filter: '+esc(isSiteRoot?('Aktuell site: '+activeOrigin):('Sitevision-ID:n i grenen, kompakt filter: '+ids.length))+'</p><p>Publicerade sid-ID:n: '+ids.length+'</p><h4>Tidsprofil för hela serverkedjan</h4><p>Inställningar och period: '+configMs+' ms</p><p>Aktuell sida, site och backend: '+contextMs+' ms</p><p>Kontroll om sidan har en gren: '+branchCheckMs+' ms</p><p>Identifiera webbplats-origin i Piwik: '+originLookupMs+' ms · '+(detectedOrigin?('HTTP '+detectedOrigin.statusCode):'ej frågad')+'</p><p>Läsa Sitevision-grenen: '+treeMs+' ms · '+tree.visited+' noder besökta</p><p>Identifiera grenens Piwik-URL: används inte i 1.8.1+'</p><p>Bygga filter: '+filterMs+' ms</p><p>Piwik-frågor för aktuell gren: '+piwikMainMs+' ms</p><p>Jämförelse mot hela webbplatsen: '+comparisonMs+' ms</p><p>Bearbeta statistikresultat: '+processingMs+' ms</p><p>Bygga HTML: '+renderMs+' ms</p><p>Övrig uppmätt tid: '+unaccountedMs+' ms</p><p><strong>Totalt hittills: '+requestSoFarMs+' ms</strong></p><h4>Piwik-frågor</h4><p>Översikt: '+diagResult(totalsB)+'</p><p>Sidor: '+diagResult(pages)+'</p><p>Enheter: '+diagResult(devicesB)+'</p><p>Länder: '+diagResult(countriesB)+'</p><p>Källor i grenen: '+(sourcesB?sourcesB.ms+' ms · HTTP '+sourcesB.statusCode:'ej frågad')+'</p><p>Filer: '+(downloadsB?downloadsB.ms+' ms · HTTP '+downloadsB.statusCode:'ej frågad')+'</p><p>Externa länkar: '+(outlinksB?outlinksB.ms+' ms · HTTP '+outlinksB.statusCode:'ej frågad')+'</p><p>Kampanjer: '+(campaignsB?campaignsB.ms+' ms · HTTP '+campaignsB.statusCode:'ej frågad')+'</p><p>AI-trafik: '+(aiTrafficB?aiTrafficB.ms+' ms · HTTP '+aiTrafficB.statusCode:'ej frågad')+'</p><p>Nätverk för datakvalitet: '+(trafficQualityB?trafficQualityB.ms+' ms · HTTP '+trafficQualityB.statusCode:'ej frågad')+'</p><p>Querystring-varianter: '+(variantResult?variantResult.ms+' ms · HTTP '+variantResult.statusCode:'ej frågad')+'</p><p>Jämförelse webbplats · enheter: '+(siteDevices?siteDevices.ms+' ms · HTTP '+siteDevices.statusCode:'ej frågad')+'</p><p>Jämförelse webbplats · länder: '+(siteCountries?siteCountries.ms+' ms · HTTP '+siteCountries.statusCode:'ej frågad')+'</p><p>Jämförelse webbplats · källor: '+(siteSources?siteSources.ms+' ms · HTTP '+siteSources.statusCode:'ej frågad')+'</p>'+countryDiagnostics(countriesB)+networkDiagnostics(trafficQualityB)+'<p>PageID-dimension: '+esc(PAGE_ID_DIM)+'</p><p>Filter: printable '+(excludeSettings.printable?'på':'av')+', querystring '+(excludeSettings.queryString?'på':'av')+', inloggad '+(excludeSettings.inloggad?'på':'av')+', systemdelar '+(excludeSettings.systemParts?'på':'av')+', egna mönster '+excludeSettings.customPatterns.length+', querystring-undantag '+excludeSettings.queryExceptions.length+'</p></details>';
     }
     return res.send(hb+'</div>');
   }
