@@ -1,6 +1,6 @@
 {
   "name": "besoksstatistik",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "dependencies": {
     "@sitevision/api": "^2026.9.2",
     "@sitevision/sitevision-scripts": "^8.0.4",
