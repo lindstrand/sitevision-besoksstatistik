@@ -10,7 +10,7 @@ import nodeFilterUtil from '@sitevision/api/server/NodeFilterUtil';
 import nodeIteratorUtil from '@sitevision/api/server/NodeIteratorUtil';
 import restAppInvokerFactory from '@sitevision/api/server/RestAppInvokerFactory';
 
-const APP_VERSION = '1.8.1';
+const APP_VERSION = '1.8.2';
 const LOG_PREFIX = `[Besöksstatistik ${APP_VERSION}]`;
 
 const API = {
@@ -65,7 +65,7 @@ function logDebug(message) {
    * Det gör att historisk trafik följer sidan även om dess URL har ändrats.
    *
    * Utvecklare: Magnus Lindstrand, Hässleholms kommun
-   * Version: 1.8.1
+   * Version: 1.8.2
    */
   var BACKEND='/rest-api/sv-piwik-pro-backend';
   var QUERY_ROUTE='/ai-tool/query'; // Endpointnamn tillhandahållet av Sitevision.
@@ -798,37 +798,87 @@ function logDebug(message) {
     var parts=raw.split('/'),name=parts.length?parts[parts.length-1]:raw;
     return name||raw||'Fil';
   }
+  function downloadMergeKey(url){
+    var raw=String(url||'').replace(/^\s+|\s+$/g,'');
+    var match=raw.match(/^https?:\/\/[^\/]+(\/download\/[^?#]+)(?:[?#].*)?$/i);
+    return match?String(match[1]).toLowerCase():raw;
+  }
   function renderDownloads(result,title){
     if(result&&!result.ok)return sectionError(title||'Filer som öppnats eller laddats ner',result,true);
     var rs=result&&result.ok?rows(result):[];
     if(!rs.length)return '';
-    var useful=[];
+    var map={},useful=[];
     for(var i=0;i<rs.length;i++){
       var u=String(label(rs[i],'download_url')||'');
       var d=num(rs[i].downloads),ud=num(rs[i].unique_downloads);
-      if(u&&(d>0||ud>0))useful.push({url:u,name:downloadName(u),downloads:d,unique:ud});
+      if(!u||(!d&&!ud))continue;
+      var key=downloadMergeKey(u);
+      if(!map[key]){
+        map[key]={url:u,name:downloadName(u),downloads:0,unique:0,variants:0,merged:false};
+        useful.push(map[key]);
+      }
+      map[key].downloads+=d;
+      // Samma Sitevision-fil kan nås via flera domäner. Unika klick kan då
+      // överlappa mellan Piwik-raderna och ska därför inte summeras.
+      map[key].unique=Math.max(map[key].unique,ud);
+      map[key].variants+=1;
+      map[key].merged=map[key].variants>1;
     }
     if(!useful.length)return '';
     useful.sort(function(a,b){return b.downloads-a.downloads;});
     var h='<section class="svs-panel svs-wide"><h3 class="env-ui-text-sectionheading">'+esc(title||'Filer som öppnats eller laddats ner')+'</h3>';
-    h+='<p class="svs-muted">Piwik registrerar klick på länkar till filer. Det visar inte om hela filen faktiskt laddades ner eller lästes.</p>';
+    h+='<p class="svs-muted">Piwik registrerar klick på länkar till filer. Det visar inte om hela filen faktiskt laddades ner eller lästes. Samma Sitevision-fil som nås via flera domäner visas som en rad.</p>';
     h+='<div class="svs-table-wrap"><table class="svs-table"><thead><tr><th scope="col">Fil</th><th scope="col">Klick</th><th scope="col">Unika klick</th></tr></thead><tbody>';
     for(i=0;i<Math.min(10,useful.length);i++){
       var x=useful[i],href=safeHref(x.url,true),fileLabel=href?'<a class="svs-page-link" href="'+esc(href)+'" target="_blank" rel="noopener noreferrer" aria-label="'+esc(x.name+' (öppnas i ny flik)')+'">'+esc(x.name)+' <span class="svs-external" aria-hidden="true">↗</span></a>':'<span class="svs-page-name">'+esc(x.name)+'</span>';
-      h+='<tr><th scope="row">'+fileLabel+'</th><td>'+fmt(x.downloads)+'</td><td>'+fmt(x.unique)+'</td></tr>';
+      h+='<tr><th scope="row">'+fileLabel+'</th><td>'+fmt(x.downloads)+'</td><td>'+(x.merged?('minst '+fmt(x.unique)):fmt(x.unique))+'</td></tr>';
     }
     return h+'</tbody></table></div></section>';
   }
 
+  function queryParam(url,name){
+    var raw=String(url||''),q=raw.indexOf('?');
+    if(q<0)return '';
+    var parts=raw.substring(q+1).split('#')[0].split('&');
+    for(var i=0;i<parts.length;i++){
+      var bit=parts[i].split('='),key=bit.shift()||'';
+      try{key=decodeURIComponent(key.replace(/\+/g,' '));}catch(ignore){}
+      if(key.toLowerCase()===String(name||'').toLowerCase()){
+        var value=bit.join('=');
+        try{return decodeURIComponent(value.replace(/\+/g,' '));}catch(ignore2){return value;}
+      }
+    }
+    return '';
+  }
+  function readableUrlPart(value){
+    var raw=String(value||'');
+    try{raw=decodeURIComponent(raw);}catch(ignore){}
+    return raw.replace(/^https?:\/\//i,'');
+  }
+  function middleCompact(value,max){
+    var s=String(value||''),limit=max||100;
+    if(s.length<=limit)return s;
+    var first=Math.max(24,Math.floor(limit*0.35)),last=Math.max(36,limit-first-1);
+    return s.substring(0,first)+'…'+s.substring(s.length-last);
+  }
   function outlinkName(url){
     var raw=String(url||'');
     if(!raw)return 'Extern länk';
     try{
-      var noProtocol=raw.replace(/^https?:\/\//i,'');
+      var hostMatch=raw.match(/^https?:\/\/([^\/?#]+)/i),host=hostMatch?hostMatch[1]:'';
+      if(host&&host.toLowerCase().indexOf('readspeaker.com')>=0){
+        var target=queryParam(raw,'url');
+        if(target){
+          var targetClean=readableUrlPart(target).split('?')[0].split('#')[0].replace(/\/+$/,'');
+          var targetParts=targetClean.split('/'),pageName=targetParts[targetParts.length-1]||targetClean;
+          return 'ReadSpeaker · '+middleCompact(pageName,75);
+        }
+      }
+      var noProtocol=readableUrlPart(raw);
       var q=noProtocol.search(/[?#]/),base=q>=0?noProtocol.substring(0,q):noProtocol,hasParams=q>=0;
-      if(base.length>90)base=base.substring(0,87)+'…';
-      return base+(hasParams?'?…':'');
-    }catch(ignore){return raw.length>90?raw.substring(0,87)+'…':raw;}
+      base=base.replace(/\/+$/,'');
+      return middleCompact(base,105)+(hasParams?' ?…':'');
+    }catch(ignore){return middleCompact(raw,105);}
   }
   function outlinkRows(items,start,end){
     var h='';
@@ -1210,7 +1260,7 @@ function logDebug(message) {
       var requestSoFarMs=Date.now()-requestStart;
       var knownPhaseMs=configMs+contextMs+branchCheckMs+originLookupMs+treeMs+branchUrlMs+filterMs+piwikMainMs+comparisonMs+processingMs+renderMs;
       var unaccountedMs=Math.max(0,requestSoFarMs-knownPhaseMs);
-      hb+='<details class="svs-diag"><summary>Teknisk diagnostik</summary><p>Läge: Denna gren</p><p>Aktuell sida: '+esc(pg.id)+' · '+esc(pg.type)+'</p><p>Aktuell site: '+esc(site.siteName||site.siteId)+'</p><p>Piwik-filter: '+esc(isSiteRoot?('Aktuell site: '+activeOrigin):('Sitevision-ID:n i grenen, kompakt filter: '+ids.length))+'</p><p>Publicerade sid-ID:n: '+ids.length+'</p><h4>Tidsprofil för hela serverkedjan</h4><p>Inställningar och period: '+configMs+' ms</p><p>Aktuell sida, site och backend: '+contextMs+' ms</p><p>Kontroll om sidan har en gren: '+branchCheckMs+' ms</p><p>Identifiera webbplats-origin i Piwik: '+originLookupMs+' ms · '+(detectedOrigin?('HTTP '+detectedOrigin.statusCode):'ej frågad')+'</p><p>Läsa Sitevision-grenen: '+treeMs+' ms · '+tree.visited+' noder besökta</p><p>Identifiera grenens Piwik-URL: används inte i 1.8.1</p><p>Bygga filter: '+filterMs+' ms</p><p>Piwik-frågor för aktuell gren: '+piwikMainMs+' ms</p><p>Jämförelse mot hela webbplatsen: '+comparisonMs+' ms</p><p>Bearbeta statistikresultat: '+processingMs+' ms</p><p>Bygga HTML: '+renderMs+' ms</p><p>Övrig uppmätt tid: '+unaccountedMs+' ms</p><p><strong>Totalt hittills: '+requestSoFarMs+' ms</strong></p><h4>Piwik-frågor</h4><p>Översikt: '+diagResult(totalsB)+'</p><p>Sidor: '+diagResult(pages)+'</p><p>Enheter: '+diagResult(devicesB)+'</p><p>Länder: '+diagResult(countriesB)+'</p><p>Källor i grenen: '+(sourcesB?sourcesB.ms+' ms · HTTP '+sourcesB.statusCode:'ej frågad')+'</p><p>Filer: '+(downloadsB?downloadsB.ms+' ms · HTTP '+downloadsB.statusCode:'ej frågad')+'</p><p>Externa länkar: '+(outlinksB?outlinksB.ms+' ms · HTTP '+outlinksB.statusCode:'ej frågad')+'</p><p>Kampanjer: '+(campaignsB?campaignsB.ms+' ms · HTTP '+campaignsB.statusCode:'ej frågad')+'</p><p>AI-trafik: '+(aiTrafficB?aiTrafficB.ms+' ms · HTTP '+aiTrafficB.statusCode:'ej frågad')+'</p><p>Nätverk för datakvalitet: '+(trafficQualityB?trafficQualityB.ms+' ms · HTTP '+trafficQualityB.statusCode:'ej frågad')+'</p><p>Querystring-varianter: '+(variantResult?variantResult.ms+' ms · HTTP '+variantResult.statusCode:'ej frågad')+'</p><p>Jämförelse webbplats · enheter: '+(siteDevices?siteDevices.ms+' ms · HTTP '+siteDevices.statusCode:'ej frågad')+'</p><p>Jämförelse webbplats · länder: '+(siteCountries?siteCountries.ms+' ms · HTTP '+siteCountries.statusCode:'ej frågad')+'</p><p>Jämförelse webbplats · källor: '+(siteSources?siteSources.ms+' ms · HTTP '+siteSources.statusCode:'ej frågad')+'</p>'+countryDiagnostics(countriesB)+networkDiagnostics(trafficQualityB)+'<p>PageID-dimension: '+esc(PAGE_ID_DIM)+'</p><p>Filter: printable '+(excludeSettings.printable?'på':'av')+', querystring '+(excludeSettings.queryString?'på':'av')+', inloggad '+(excludeSettings.inloggad?'på':'av')+', systemdelar '+(excludeSettings.systemParts?'på':'av')+', egna mönster '+excludeSettings.customPatterns.length+', querystring-undantag '+excludeSettings.queryExceptions.length+'</p></details>';
+      hb+='<details class="svs-diag"><summary>Teknisk diagnostik</summary><p>Läge: Denna gren</p><p>Aktuell sida: '+esc(pg.id)+' · '+esc(pg.type)+'</p><p>Aktuell site: '+esc(site.siteName||site.siteId)+'</p><p>Piwik-filter: '+esc(isSiteRoot?('Aktuell site: '+activeOrigin):('Sitevision-ID:n i grenen, kompakt filter: '+ids.length))+'</p><p>Publicerade sid-ID:n: '+ids.length+'</p><h4>Tidsprofil för hela serverkedjan</h4><p>Inställningar och period: '+configMs+' ms</p><p>Aktuell sida, site och backend: '+contextMs+' ms</p><p>Kontroll om sidan har en gren: '+branchCheckMs+' ms</p><p>Identifiera webbplats-origin i Piwik: '+originLookupMs+' ms · '+(detectedOrigin?('HTTP '+detectedOrigin.statusCode):'ej frågad')+'</p><p>Läsa Sitevision-grenen: '+treeMs+' ms · '+tree.visited+' noder besökta</p><p>Identifiera grenens Piwik-URL: används inte</p><p>Bygga filter: '+filterMs+' ms</p><p>Piwik-frågor för aktuell gren: '+piwikMainMs+' ms</p><p>Jämförelse mot hela webbplatsen: '+comparisonMs+' ms</p><p>Bearbeta statistikresultat: '+processingMs+' ms</p><p>Bygga HTML: '+renderMs+' ms</p><p>Övrig uppmätt tid: '+unaccountedMs+' ms</p><p><strong>Totalt hittills: '+requestSoFarMs+' ms</strong></p><h4>Piwik-frågor</h4><p>Översikt: '+diagResult(totalsB)+'</p><p>Sidor: '+diagResult(pages)+'</p><p>Enheter: '+diagResult(devicesB)+'</p><p>Länder: '+diagResult(countriesB)+'</p><p>Källor i grenen: '+(sourcesB?sourcesB.ms+' ms · HTTP '+sourcesB.statusCode:'ej frågad')+'</p><p>Filer: '+(downloadsB?downloadsB.ms+' ms · HTTP '+downloadsB.statusCode:'ej frågad')+'</p><p>Externa länkar: '+(outlinksB?outlinksB.ms+' ms · HTTP '+outlinksB.statusCode:'ej frågad')+'</p><p>Kampanjer: '+(campaignsB?campaignsB.ms+' ms · HTTP '+campaignsB.statusCode:'ej frågad')+'</p><p>AI-trafik: '+(aiTrafficB?aiTrafficB.ms+' ms · HTTP '+aiTrafficB.statusCode:'ej frågad')+'</p><p>Nätverk för datakvalitet: '+(trafficQualityB?trafficQualityB.ms+' ms · HTTP '+trafficQualityB.statusCode:'ej frågad')+'</p><p>Querystring-varianter: '+(variantResult?variantResult.ms+' ms · HTTP '+variantResult.statusCode:'ej frågad')+'</p><p>Jämförelse webbplats · enheter: '+(siteDevices?siteDevices.ms+' ms · HTTP '+siteDevices.statusCode:'ej frågad')+'</p><p>Jämförelse webbplats · länder: '+(siteCountries?siteCountries.ms+' ms · HTTP '+siteCountries.statusCode:'ej frågad')+'</p><p>Jämförelse webbplats · källor: '+(siteSources?siteSources.ms+' ms · HTTP '+siteSources.statusCode:'ej frågad')+'</p>'+countryDiagnostics(countriesB)+networkDiagnostics(trafficQualityB)+'<p>PageID-dimension: '+esc(PAGE_ID_DIM)+'</p><p>Filter: printable '+(excludeSettings.printable?'på':'av')+', querystring '+(excludeSettings.queryString?'på':'av')+', inloggad '+(excludeSettings.inloggad?'på':'av')+', systemdelar '+(excludeSettings.systemParts?'på':'av')+', egna mönster '+excludeSettings.customPatterns.length+', querystring-undantag '+excludeSettings.queryExceptions.length+'</p></details>';
     }
     return res.send(hb+'</div>');
   }
