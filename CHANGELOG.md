@@ -1,5 +1,14 @@
 # Ändringslogg
 
+## 1.9.0
+
+- Lägger till en graf över sidvisningar över tid för både aktuell sida och gren.
+- Visar idag per timme, kortare perioder per dag och längre perioder per vecka eller månad.
+- Grafen använder samma Piwik-filter som totalsiffrorna i widgeten.
+- Lägger till **Skriv ut / spara som PDF** som skapar en ren rapportvy för webbläsarens utskriftsfunktion.
+- Rapportvyn tar bort dashboardkontroller och visar hela listor som annars ligger bakom ”Visa fler”.
+- Ingen telemetri eller automatisk rapportering av installationer har lagts till.
+
 ## 1.8.2
 
 - Slår ihop samma Sitevision-fil när den nås via flera domäner men har samma `/download/...`-sökväg.
