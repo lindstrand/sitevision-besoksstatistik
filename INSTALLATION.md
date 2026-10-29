@@ -110,7 +110,7 @@ Du kan också öppna PowerShell först och gå till mappen med `cd`.
 Exempel:
 
 ```powershell
-cd C:\Users\dittnamn\Downloads\sitevision-besoksstatistik
+cd D:\Sitevision\sitevision-besoksstatistik
 ```
 
 Kontrollera att du är i rätt mapp. Där ska bland annat `package.json`, `manifest.json` och mappen `src` finnas.
