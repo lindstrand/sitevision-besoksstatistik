@@ -7,7 +7,6 @@
 - Grafen använder samma Piwik-filter som totalsiffrorna i widgeten.
 - Lägger till **Skriv ut / spara som PDF** som skapar en ren rapportvy för webbläsarens utskriftsfunktion.
 - Rapportvyn tar bort dashboardkontroller och visar hela listor som annars ligger bakom ”Visa fler”.
-- Ingen telemetri eller automatisk rapportering av installationer har lagts till.
 
 ## 1.8.2
 
@@ -15,7 +14,6 @@
 - Visar en försiktig nedre gräns för unika filklick när flera domänvarianter har slagits ihop.
 - Förbättrar visningen av långa externa länkar genom att behålla både början och slutet av adressen.
 - Visar ReadSpeaker-länkar med namnet på sidan som lästes upp när det kan utläsas ur länken.
-- Ändrar inte grenfiltrering eller övrig statistiklogik.
 
 ## 1.8.1
 
@@ -23,7 +21,6 @@
 - Tar bort URL-prefix som alternativt grenfilter.
 - Historisk trafik följer därmed samma sida även om sidans URL har ändrats.
 - Förhindrar att "Denna gren" kan visa färre sidvisningar än grensidan själv på grund av olika avgränsningsmetoder.
-- Övrig statistiklogik och frågor, inklusive AI-trafik, är oförändrade.
 
 ## 1.8.0
 
