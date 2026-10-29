@@ -6,7 +6,7 @@ Besöksstatistik är en dashboard-widget för Sitevision. Den visar besöksstati
 
 Widgeten visar sidvisningar över tid med samma filtrering som övrig statistik. Upplösningen anpassas efter vald period: idag visas per timme, kortare perioder per dag och längre perioder per vecka eller månad.
 
-Knappen **Skriv ut / spara som PDF** öppnar en ren rapportvy som kan skrivas ut eller sparas som PDF i webbläsaren. Ingen statistik skickas till utvecklaren och widgeten innehåller ingen telemetri.
+Knappen **Skriv ut / spara som PDF** öppnar en ren rapportvy som kan skrivas ut eller sparas som PDF i webbläsaren.
 
 ## Det här visar widgeten
 
