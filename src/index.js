@@ -57,9 +57,8 @@ function logDebug(message) {
    * sv-piwik-pro-backend och RestAppInvokerFactory. Widgeten innehåller inga
    * egna Piwik-autentiseringsuppgifter.
    *
-   * Root-routen gör inga Piwik-anrop. Jag vill att redaktören ska få en synlig
-   * laddningsstatus direkt, därför hämtar klienten själva statistiken från den
-   * fristående routen /statistics.
+   * Root-routen gör inga Piwik-anrop. Statistik hämtas från den fristående
+   * routen /statistics så att laddningsstatus kan visas direkt.
    *
    * Grenstatistik använder Sitevision-ID:n för samtliga publicerade sidor i grenen.
    * Det gör att historisk trafik följer sidan även om dess URL har ändrats.
@@ -1143,9 +1142,8 @@ function logDebug(message) {
   function css(){return '<style>.svs{font-family:Arial,sans-serif;color:#222;line-height:1.4}.svs *{box-sizing:border-box}.svs-head{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start}.svs h2{font-size:1.55rem;line-height:1.2;margin:0}.svs h3{font-size:1.05rem;margin:0 0 .8rem}.svs-sub{font-weight:600;color:#555;margin-top:.25rem}.svs-badge{border:1px solid #c9ced4;border-radius:999px;padding:.45rem .75rem;white-space:nowrap;background:#fff;font-size:.9rem}.svs-mode{margin:.85rem 0 .2rem}.svs-mode form{display:inline-flex;border:1px solid #bfc6ce;border-radius:.5rem;overflow:hidden}.svs-mode button{border:0;background:#fff;padding:.5rem .9rem;font:inherit;cursor:pointer}.svs-mode button+button{border-left:1px solid #bfc6ce}.svs-mode button.active{background:#eef5ff;font-weight:700}.svs-mode button:focus-visible{outline:3px solid #1d70b8;outline-offset:-3px}.svs-period{border-bottom:1px solid #dde1e5;padding:1rem 0 1.15rem;margin-bottom:1rem}.svs-period form{display:flex;gap:.45rem;flex-wrap:wrap}.svs-period button,.svs-period summary{border:1px solid #bfc6ce;border-radius:999px;background:#fff;padding:.45rem .8rem;cursor:pointer;font:inherit}.svs-period button:hover,.svs-period summary:hover{background:#f5f7f9}.svs-period button:focus-visible,.svs-period summary:focus-visible,.svs-page-link:focus-visible{outline:3px solid #1d70b8;outline-offset:2px}.svs-period button.active{background:#eef5ff;border-color:#6d9ed6;font-weight:700}.svs-period details{margin-top:.7rem}.svs-period details>summary{display:inline-block}.svs-custom{margin-top:.75rem;align-items:end}.svs-custom label{display:flex;flex-direction:column;gap:.25rem;font-weight:600}.svs-custom input{padding:.45rem;border:1px solid #bfc6ce;border-radius:.25rem}.svs-metrics,.svs-health{display:grid;gap:.8rem}.svs-metrics{grid-template-columns:repeat(auto-fit,minmax(13rem,1fr))}.svs-health{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:.8rem}.svs-metric,.svs-panel{border:1px solid #d4d8dd;border-radius:.5rem;background:#fff;padding:1rem}.svs-metric .v{font-size:1.8rem;line-height:1.1;font-weight:700;margin:.25rem 0;font-variant-numeric:tabular-nums}.svs-muted{color:#666;font-size:.9rem}.svs-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(20rem,.85fr);gap:1rem;margin-top:1rem}.svs-list-panel{margin-bottom:1rem}.svs-list{list-style:none;padding:0;margin:0}.svs-list li{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;border-bottom:1px solid #e4e6e8;padding:.65rem 0}.svs-list li:last-child{border-bottom:0}.svs-page{min-width:0}.svs-page-link,.svs-page-name{font-weight:700;color:#222;text-decoration:none;overflow-wrap:anywhere}.svs-page-link:hover{text-decoration:underline}.svs-external{font-size:.85em;font-weight:400}.svs-count{font-variant-numeric:tabular-nums;white-space:nowrap}.svs-row-watch{background:#fff8e8;border-left:4px solid #a56b00;padding-left:.55rem!important;padding-right:.45rem!important}.svs-row-alert{background:#fff1f1;border-left:4px solid #a63d40;padding-left:.55rem!important;padding-right:.45rem!important}.svs-status{display:block;margin-top:.15rem;font-size:.82rem;font-weight:600;color:#555}.svs-row-watch .svs-status{color:#735000}.svs-row-alert .svs-status{color:#8a2f32}.svs-metric-alert{background:#fff4f4;border-color:#d7a8aa}.svs-more>summary{font-weight:700;cursor:pointer;padding:.7rem 0}.svs-more .open{display:none}.svs-more[open]>summary .closed{display:none}.svs-more[open]>summary .open{display:inline}.svs-bars{list-style:none;padding:0;margin:0}.svs-bars li{margin:.7rem 0}.svs-bar-head{display:flex;justify-content:space-between;gap:1rem}.svs-track{height:.5rem;background:#e5e7ea;border-radius:99px;overflow:hidden;margin:.3rem 0}.svs-track span{display:block;height:100%;background:#3f6fa8}.svs-insight{margin-top:1rem;border:1px solid #cfd8e3;border-radius:.5rem;padding:1rem;background:#f7f9fc}.svs-insight h3{margin-bottom:.45rem}.svs-insight strong{display:block;margin-bottom:.2rem}.svs-insight p{margin:.2rem 0 0}.svs-diag{margin-top:1rem;border-top:1px solid #ddd;padding-top:.7rem}.svs-error{border-left:4px solid #c33;background:#fff5f5;padding:1rem}.svs-kv{list-style:none;margin:0;padding:0}.svs-kv li{display:flex;justify-content:space-between;gap:1rem;padding:.55rem 0;border-bottom:1px solid #e4e6e8}.svs-kv li:last-child{border-bottom:0}.svs-wide{margin-top:1rem}.svs-table-wrap{overflow-x:auto}.svs-table{width:100%;border-collapse:collapse}.svs-table th,.svs-table td{text-align:left;padding:.55rem .65rem;border-bottom:1px solid #e4e6e8}.svs-table td{font-variant-numeric:tabular-nums}.svs-assistive{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}.svs-warning{border-left:4px solid #b8860b;background:#fffaf0;padding:.8rem;margin-top:1rem}.svs-progressive-note{margin-top:1rem;padding:.8rem 1rem;border:1px solid #d4d8dd;border-radius:.5rem;background:#f7f9fc;color:#555;font-size:.9rem}.svs-time-card{min-width:0}.svs-time-pair{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.svs-time-pair>div+div{border-left:1px solid #e1e4e8;padding-left:1rem}.svs-time-details{margin-top:.75rem;border-top:1px solid #e1e4e8;padding-top:.6rem}.svs-time-details summary{font-weight:700;cursor:pointer}.svs-time-details summary:focus-visible{outline:3px solid #1d70b8;outline-offset:2px}.svs-time-buckets{list-style:none;padding:0;margin:.5rem 0 0}.svs-time-buckets li{margin:.55rem 0}.svs-time-buckets .svs-track{margin:.2rem 0}.svs-report-actions{display:flex;justify-content:flex-end;margin:.2rem 0 1rem}.svs-print-button{border:1px solid #bfc6ce;border-radius:.35rem;background:#fff;padding:.55rem .9rem;cursor:pointer;font:inherit;font-weight:700}.svs-print-button:hover{background:#f5f7f9}.svs-print-button:focus-visible{outline:3px solid #1d70b8;outline-offset:2px}.svs-chart-panel{padding:1rem}.svs-chart-head{display:flex;justify-content:space-between;gap:1rem}.svs-chart-head p{margin:.1rem 0 .7rem}.svs-chart-scroll{overflow-x:auto}.svs-chart{display:block;width:100%;min-width:34rem;height:auto}.svs-chart-grid{stroke:#d9dde2;stroke-width:1}.svs-chart-line{fill:none;stroke:#1976b9;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}.svs-chart circle{fill:#1976b9}.svs-chart-axis{fill:#555;font-size:12px}.svs-chart-data{margin-top:.65rem}.svs-chart-data summary{font-weight:700;cursor:pointer}.svs-chart-data summary:focus-visible{outline:3px solid #1d70b8;outline-offset:2px}@media(max-width:850px){.svs-metrics,.svs-health,.svs-grid{grid-template-columns:1fr}.svs-head{display:block}.svs-badge{display:inline-block;margin-top:.6rem}}</style>';}
 
   function renderStatistics(req,res,forceCoreOnly){
-    // 1.6.6: Jag mäter nu hela serverkedjan även på sidnivå, inte bara Piwik-frågorna.
-    // Då kan vi se om väntan ligger i Sitevision-trädet, filterbygget, Piwik,
-    // jämförelsefrågorna eller vår egen bearbetning/rendering.
+    // Diagnostiken mäter hela serverkedjan på sidnivå för att skilja tid i
+    // Sitevision-trädet, filterbygget, Piwik, jämförelser och rendering.
     var requestStart=Date.now(),phaseStart=requestStart;
     var app=safeRequire('appData'),data=app.ok?app.value:null,glob=safeRequire('globalAppData'),globalData=glob.ok?glob.value:null;
     PAGE_ID_DIM=validPageIdDimension(get(globalData,'pageIdDimension','event_custom_dimension_1'));
@@ -1201,9 +1199,8 @@ function logDebug(message) {
       var pageSeries=timeSeriesQuery(rest,d,pf);
       var avgTime=query(rest,d,pf,[{column_id:'time_on_page',transformation_id:'average'},{column_id:'time_on_page',transformation_id:'median'},{column_id:'time_on_page',transformation_id:'sum'}],1,[]);
       var timeDist=query(rest,d,pf,[{column_id:'time_on_page'},{column_id:'page_views'}],2000,[[0,'asc']]);
-      // Länder och enheter beskriver vilka besök vi har, inte hur många sidor de råkar ladda.
-      // Därför sorterar och procentberäknar jag dessa på sessioner. Sidvisningar följer ändå
-      // med i svaret så att vi kan upptäcka ovanliga mönster i diagnostiken.
+      // Länder och enheter beskriver besök och sorteras därför på sessioner.
+      // Sidvisningar följer med för datakvalitetskontroller i diagnostiken.
       var devices=query(rest,d,pf,[{column_id:'device_type'},{column_id:'sessions'},{column_id:'visitors'},{column_id:'page_views'}],20,[[1,'desc']]);
       var countries=query(rest,d,pf,[{column_id:'location_country_name'},{column_id:'sessions'},{column_id:'visitors'},{column_id:'page_views'}],20,[[1,'desc']]);
       var sources=query(rest,d,pf,[{column_id:'source'},{column_id:'page_views'}],20,[[1,'desc']]);
@@ -1296,8 +1293,8 @@ function logDebug(message) {
       return res.send(coreHtml+'</div>');
     }
     var piwikMainStart=Date.now();
-    // För länder och enheter använder jag besök som huvudmått. En crawler som laddar många
-    // sidor under samma session ska inte kunna väga lika tungt som många riktiga besök.
+    // Länder och enheter använder besök som huvudmått så att många sidvisningar
+    // inom samma session inte får oproportionerligt stor vikt.
     var branchSeries=timeSeriesQuery(rest,d,filter);
     var totalsB=query(rest,d,filter,[{column_id:'page_views'},{column_id:'sessions'},{column_id:'visitors'}],1,[]),pages=query(rest,d,filter,[{column_id:PAGE_ID_DIM},{column_id:'sessions'},{column_id:'visitors'},{column_id:'page_views'}],Math.min(Math.max(ids.length+50,100),1000),[[1,'desc']]),devicesB=query(rest,d,filter,[{column_id:'device_type'},{column_id:'sessions'},{column_id:'visitors'},{column_id:'page_views'}],20,[[1,'desc']]),countriesB=query(rest,d,filter,[{column_id:'location_country_name'},{column_id:'sessions'},{column_id:'visitors'},{column_id:'page_views'}],20,[[1,'desc']]),sourcesB=showInsights?query(rest,d,filter,[{column_id:'source'},{column_id:'page_views'}],20,[[1,'desc']]):null;
     var downloadsB=showDownloads?query(rest,d,eventScopeB,[{column_id:'download_url'},{column_id:'downloads'},{column_id:'unique_downloads'}],100,[[1,'desc']]):null;
@@ -1342,9 +1339,8 @@ function logDebug(message) {
     return res.send(hb+'</div>');
   }
 
-  // Jag håller root-routen medvetet liten. Tidigare väntade Sitevision på alla
-  // Piwik-frågor innan något kunde visas. Nu får redaktören laddningsstatus
-  // direkt och den tunga hämtningen körs separat i /statistics.
+  // Root-routen hålls liten så att laddningsstatus kan visas direkt medan
+  // statistik hämtas separat från /statistics.
   router.get('/',function(req,res){
     try{
       var configQuery=localConfigQuery(globalAppData);
@@ -1355,9 +1351,7 @@ function logDebug(message) {
     }
   });
 
-  // Samma statistikmotor som i den stabila 1.5.9-versionen körs här.
-  // Det gör att vi kan ändra laddningsflödet utan att samtidigt skriva om
-  // den Piwik-logik som redan är testad.
+  // Statistikmotorn används av separata routes för grundstatistik och full statistik.
   function handleStatistics(req,res,coreOnly){
     var requestStart=Date.now();
     try{
