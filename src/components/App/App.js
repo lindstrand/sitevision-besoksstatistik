@@ -227,9 +227,33 @@ const App = ({ configQuery, startupError }) => {
     };
 
     const onClick = (event) => {
-      const button = event.target && event.target.closest
-        ? event.target.closest('button[type="submit"]')
-        : null;
+      const target = event.target && event.target.closest ? event.target : null;
+      const printButton = target && target.closest('.svs-print-button');
+      if (printButton) {
+        event.preventDefault();
+        const content = root.querySelector('.svs-async-content .svs');
+        const style = root.querySelector('.svs-async-content style');
+        if (!content) return;
+        const clone = content.cloneNode(true);
+        clone.querySelectorAll('.svs-mode,.svs-period,.svs-report-actions,.svs-diag,.svs-progressive-note').forEach((el) => el.remove());
+        clone.querySelectorAll('details.svs-more,details.svs-chart-data,details.svs-time-details').forEach((el) => el.setAttribute('open', ''));
+        const win = window.open('', '_blank', 'noopener,noreferrer');
+        if (!win) {
+          window.print();
+          return;
+        }
+        win.document.open();
+        win.document.write('<!doctype html><html lang="sv"><head><meta charset="utf-8"><title>Besöksstatistik</title>' +
+          (style ? style.outerHTML : '') +
+          '<style>body{margin:24px;background:#fff;color:#222}.svs{max-width:1100px;margin:0 auto}.svs-more>summary,.svs-chart-data>summary,.svs-time-details>summary{display:none}.svs-grid{grid-template-columns:1fr 1fr}@media print{body{margin:0}.svs-panel,.svs-metric,.svs-insight{break-inside:avoid}.svs-grid{display:block}.svs-grid>div>*{margin-bottom:12px}}</style></head><body>' +
+          clone.outerHTML + '</body></html>');
+        win.document.close();
+        window.setTimeout(() => {
+          try { win.focus(); win.print(); } catch (ignore) {}
+        }, 250);
+        return;
+      }
+      const button = target && target.closest('button[type="submit"]');
       if (button) submitterRef.current = button;
     };
 
